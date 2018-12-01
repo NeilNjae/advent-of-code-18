@@ -12,7 +12,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Control.Applicative as CA
 
 import Data.IntSet (IntSet)
-import qualified Data.IntSet as IntSet
+import qualified Data.IntSet as S
 
 main :: IO ()
 main = do 
@@ -26,33 +26,27 @@ part1 :: [Int] -> Int
 part1 = sum 
 
 part2 :: [Int] -> Int
-part2 changes = snd $ head $ dropWhile unRepeated $ scanl merge (IntSet.empty, 0) $ cycle changes
-
+part2 changes = snd $ head $ dropWhile unRepeated $ scanl merge (S.empty, 0) $ cycle changes
 
 merge :: (IntSet, Int) -> Int -> (IntSet, Int)
-merge (s, f) c = (IntSet.insert f s, f+c)
+merge (frequencies, frequency) change = (S.insert frequency frequencies, frequency + change)
 
 unRepeated :: (IntSet, Int) -> Bool
-unRepeated (s, f) = f `IntSet.notMember` s
+unRepeated (frequencies, frequency) = frequency `S.notMember` frequencies
 
 -- Parse the input file
 type Parser = Parsec Void Text
 
 sc :: Parser ()
--- sc = L.space (skipSome spaceChar) CA.empty CA.empty
-sc = L.space (skipSome (char ' ')) CA.empty CA.empty
+sc = L.space (skipSome spaceChar) CA.empty CA.empty
+-- sc = L.space (skipSome (char ' ')) CA.empty CA.empty
 
 
 lexeme  = L.lexeme sc
 integer = lexeme L.decimal
 signedInteger = L.signed sc integer
 
--- symb = L.symbol sc
--- comma = symb ","
-
-
-changesP = signedInteger `sepEndBy` newline
-
+changesP = many signedInteger
 
 successfulParse :: Text -> [Int]
 successfulParse input = 
