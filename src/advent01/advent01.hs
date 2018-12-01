@@ -26,7 +26,7 @@ part1 :: [Int] -> Int
 part1 = sum 
 
 part2 :: [Int] -> Int
-part2 changes = snd $ head $ dropWhile unRepeated $ scanl merge (S.empty, 0) $ cycle changes
+part2 = snd . head . dropWhile unRepeated . scanl merge (S.empty, 0) . cycle 
 
 merge :: (IntSet, Int) -> Int -> (IntSet, Int)
 merge (frequencies, frequency) change = (S.insert frequency frequencies, frequency + change)
