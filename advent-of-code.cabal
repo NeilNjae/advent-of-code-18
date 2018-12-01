@@ -1,0 +1,29 @@
+name:                advent-of-code
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/neilnjae/advent-of-code#readme
+license:             BSD3
+license-file:        LICENSE
+author:              Neil Smith
+maintainer:          noone@njae.me.uk
+copyright:           2018 Neil Smith
+category:            None
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:  README.md
+
+executable advent-of-code
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+
+executable advent01
+  hs-source-dirs:      src/advent01
+  main-is:             advent01.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
