@@ -1,6 +1,5 @@
 import Data.List
 
-
 main :: IO ()
 main = do 
         text <- readFile "data/advent02.txt"
@@ -17,18 +16,12 @@ letterCounts = map length . group . sort
 
 addCounts :: (Int, Int) -> [Int] -> (Int, Int)
 addCounts (twos, threes) counts = (twos', threes')
-    where twos'   = if has2 counts then twos + 1   else twos
-          threes' = if has3 counts then threes + 1 else threes
+    where twos'   = if 2 `elem` counts then twos + 1   else twos
+          threes' = if 3 `elem` counts then threes + 1 else threes
 
-has2 = elem 2
-has3 = elem 3
-
-part2 ids = uncurry sameChars closeIds
-    where closeIds = head $ filter (\ab -> uncurry differenceCount ab == 1) [(a, b) | a <- ids, b <- ids]
+part2 ids = uncurry intersect closeIds
+    where closeIds = head $ filter (\ab -> uncurry differenceCount ab == 1) 
+                        [(a, b) | a:rest <- tails ids, b <- rest]
 
 differenceCount :: String -> String -> Int
 differenceCount this that = length $ filter (\(a, b) -> a /= b) $ zip this that
-
-sameChars :: String -> String -> String
-sameChars this that = map fst $ filter (\(a, b) -> a == b) $ zip this that
-
