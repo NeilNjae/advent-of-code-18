@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 import Data.List
--- import Data.Tuple (swap)
 
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
@@ -14,7 +13,6 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Control.Applicative as CA
 
 import Data.Time
--- import Data.Time.LocalTime
 
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
@@ -33,7 +31,6 @@ type Guards = S.Set GuardId
 type GuardSleepDuration = M.Map GuardId Int
 type SleepFrequency = M.Map Int Int -- key = minute, value = times spent asleep
 type GuardSleepFrequency = M.Map (GuardId, Int) Int -- key = (guardID, minute), value = times spent asleep
-
 
 
 main :: IO ()
