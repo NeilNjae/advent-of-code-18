@@ -4,11 +4,8 @@ import Data.Char (toLower)
 main :: IO ()
 main = do 
         text <- readFile "data/advent05.txt"
-        -- let ids = lines text
         print $ part1 text
         print $ part2 text
-        -- putStrLn $ part2 ids
-
 
 part1 = reactedLength
 
