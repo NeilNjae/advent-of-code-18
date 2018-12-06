@@ -58,3 +58,12 @@ executable advent05
   main-is:             advent05.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
+
+executable advent06
+  hs-source-dirs:      src/advent06
+  main-is:             advent06.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
