@@ -67,3 +67,4 @@ executable advent06
                      , text
                      , megaparsec
                      , containers
+          

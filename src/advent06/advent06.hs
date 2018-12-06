@@ -70,10 +70,10 @@ largestRegion = maximum . map snd
 
 
 findBounds :: [Coord] -> (Integer, Integer, Integer, Integer)
-findBounds coords = ( minX - (maxY - minY) `div` 2 -- small x edge
-                    , maxX + (maxY - minY) `div` 2 -- large x edge
-                    , minY - (maxX - minX) `div` 2-- small x edge
-                    , maxY + (maxX - minX) `div` 2 -- large y edge
+findBounds coords = ( minX -- small x edge
+                    , maxX -- large x edge
+                    , minY -- small x edge
+                    , maxY -- large y edge
                     )
     where maxX = maximum $ map fst coords
           minX = minimum $ map fst coords
