@@ -15,7 +15,7 @@ import qualified Control.Applicative as CA
 import qualified Data.Map.Strict as M
 
 type Coord = (Integer, Integer) -- x, y
-type Bounds = (Integer, Integer, Integer, Integer)
+type Bounds = (Integer, Integer, Integer, Integer) -- minX, maxX, minY, maxY
 type Region = M.Map Coord Int
 
 main :: IO ()
@@ -27,8 +27,6 @@ main = do
         print boundingBox
         print $ part1 coords boundingBox
         print $ part2 coords boundingBox
-        -- print $ part1 activity
-        -- print $ part2 activity
 
 
 part1 coords bounds = largestRegion $ regionSizes $ finite edgeLabels regions
