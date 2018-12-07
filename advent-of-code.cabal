@@ -67,4 +67,12 @@ executable advent06
                      , text
                      , megaparsec
                      , containers
-          
+
+executable advent07
+  hs-source-dirs:      src/advent07
+  main-is:             advent07.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers         
