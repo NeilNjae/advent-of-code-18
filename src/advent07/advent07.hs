@@ -147,8 +147,9 @@ suffixP = symb " can begin."
 
 linkFileP = many linkP
 
-linkP = pairify <$> prefixP <*> upperChar <* infixP <*> upperChar <* suffixP 
-    where pairify _ a b = (a, b)
+-- linkP = pairify <$> prefixP <*> upperChar <* infixP <*> upperChar <* suffixP 
+--     where pairify _ a b = (a, b)
+linkP = (,) <$> (prefixP *> upperChar <* infixP) <*> upperChar <* suffixP 
 
 successfulParse :: Text -> [Link]
 successfulParse input = 
