@@ -45,10 +45,6 @@ main = do
         print $ part1 numberOfPlayers numberOfMarbles
         print $ part1 numberOfPlayers (numberOfMarbles * 100)
 
-
-        -- putStrLn $ part1 schedule
-        -- print $ part2 schedule
-
 part1 players marbles = highScore $ playGame players marbles
 
 playGame :: Integer -> Integer -> Game
@@ -120,9 +116,6 @@ symb = L.symbol sc
 infixP = symb "players; last marble is worth"
 suffixP = symb "points"
 
-
--- linkP = pairify <$> prefixP <*> upperChar <* infixP <*> upperChar <* suffixP 
---     where pairify _ a b = (a, b)
 gameFileP = (,) <$> integer <* infixP <*> integer <* suffixP 
 
 successfulParse :: Text -> (Integer, Integer)
