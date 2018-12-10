@@ -84,3 +84,29 @@ executable advent08
   build-depends:       base >= 4.7 && < 5
                      , text
                      , megaparsec
+
+-- executable advent08foldable
+--   hs-source-dirs:      src/advent08
+--   main-is:             advent08-foldable.hs
+--   default-language:    Haskell2010
+--   build-depends:       base >= 4.7 && < 5
+--                      , text
+--                      , megaparsec
+
+executable advent08tree
+  hs-source-dirs:      src/advent08
+  main-is:             advent08-treelibrary.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
+
+executable advent09
+  hs-source-dirs:      src/advent09
+  main-is:             advent09.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
