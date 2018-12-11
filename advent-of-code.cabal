@@ -120,3 +120,42 @@ executable advent09pl
                      , megaparsec
                      , containers
                      , pointedlist
+
+executable advent10
+  hs-source-dirs:      src/advent10
+  main-is:             advent10.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
+
+executable advent10iz
+  hs-source-dirs:      src/advent10
+  main-is:             advent10-iterate-zip.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers   
+
+executable advent11
+  hs-source-dirs:      src/advent11
+  main-is:             advent11.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+
+executable advent11m
+  hs-source-dirs:      src/advent11
+  main-is:             advent11-map.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+
+executable advent11naive
+  hs-source-dirs:      src/advent11
+  main-is:             advent11-naive.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
