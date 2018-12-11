@@ -5,19 +5,16 @@
 import Data.List
 import qualified Data.Map.Strict as M
 import Data.Map.Strict ((!))
--- import qualified Data.Set as S
--- import Data.Function (on)
 import Data.Ord (comparing)
 
 type Coord = (Integer, Integer) -- x, y
 type Grid = M.Map Coord Integer
 
-key = 5719
--- key = 42
+serialNumber = 5719
 
 main :: IO ()
 main = do 
-        let g = makeGrid key
+        let g = makeGrid serialNumber
         print $ part1 g
         print $ part2 g
 
@@ -25,10 +22,7 @@ main = do
 part1 grid = keyOfMaxValue sg
     where sg = allSubCellPower 3 grid
 
-
-part2 grid = maximumBy (comparing snd) $ [bestInGrid size grid | size <- [3..300]]
-
--- bestSubCell size grid = 
+part2 grid = maximumBy (comparing snd) [bestInGrid size grid | size <- [3..300]]
 
 makeGrid :: Integer -> Grid
 -- makeGrid key = M.fromList [((x, y), powerLevel x y key) | x <- [1..300], y <- [1..300] ]
@@ -42,8 +36,8 @@ addSummedArea grid ((x, y), power) = M.insert (x, y) (power + upper + left - upp
 
 
 powerLevel :: Integer -> Integer -> Integer -> Integer
-powerLevel 0 y _ = 0
-powerLevel x 0 _ = 0
+powerLevel 0 _ _ = 0
+powerLevel _ 0 _ = 0
 powerLevel x y key = ((interim `div` 100) `mod` 10) - 5
     where rackID = x + 10
           interim = ((rackID) * y + key) * rackID
