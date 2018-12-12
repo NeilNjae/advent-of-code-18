@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings, DeriveFunctor #-}
 
+-- Heavily based on https://gist.github.com/gatlin/21d669321c617836a317693aef63a3c3
+
 -- import Data.List
 
 import Data.Text (Text)

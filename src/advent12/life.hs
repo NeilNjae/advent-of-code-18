@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveFunctor #-}
 
+-- From https://gist.github.com/gatlin/21d669321c617836a317693aef63a3c3
+
+
 import Control.Applicative
 import Control.Comonad
 
