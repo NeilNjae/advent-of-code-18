@@ -12,7 +12,6 @@ import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Control.Applicative as CA
 
-import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 
 type Coord = (Integer, Integer) -- x, y
@@ -30,13 +29,14 @@ main = do
         print time
 
 
-part1 particles 
-    | area' > area = showParticles particles
-    | otherwise = part1 particles'
-    where particles' = updateAll particles
-          area = boundsArea particles
-          area' = boundsArea particles'
+-- part1 particles 
+--     | area' > area = showParticles particles
+--     | otherwise = part1 particles'
+--     where particles' = updateAll particles
+--           area = boundsArea particles
+--           area' = boundsArea particles'
 
+part2 :: Integer -> [Particle] -> (Integer, String)
 part2 time particles 
     | area' > area = (time, showParticles particles)
     | otherwise = part2 (time+1) particles'
@@ -78,8 +78,8 @@ showParticles particles = intercalate "\n" rows
 
 showCell :: Integer -> Integer -> Grid -> Char
 showCell x y grid 
-    | (x, y) `S.member` grid = '*'
-    | otherwise = ' '
+    | (x, y) `S.member` grid = '\x2593'
+    | otherwise = '\x2591'
 
 showRow :: Integer -> Integer -> Integer -> Grid -> String
 showRow y minX maxX grid = [showCell x y grid | x <- [minX..maxX] ]
@@ -106,8 +106,8 @@ particleFileP = many particleP
 particleP = particlify <$> positionP <*> velocityP 
     where particlify x v = Particle x v
 
-positionP = posPrefix *> pairP <* suffix
-velocityP = velPrefix *> pairP <* suffix
+positionP = between posPrefix suffix pairP 
+velocityP = between velPrefix suffix pairP
 
 pairP = (,) <$> signedInteger <* commaP <*> signedInteger
 
