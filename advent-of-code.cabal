@@ -4,7 +4,7 @@ version:             0.1.0.0
 -- description:
 homepage:            https://github.com/neilnjae/advent-of-code#readme
 license:             BSD3
-license-file:        LICENSE
+-- license-file:        LICENSE
 author:              Neil Smith
 maintainer:          noone@njae.me.uk
 copyright:           2018 Neil Smith
