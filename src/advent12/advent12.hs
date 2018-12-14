@@ -29,7 +29,6 @@ part1 rules row = sum $ (iterate (\r -> applyRules rules r) row)!!20
 
 
 part2 :: [Rule] -> Pots -> Integer
--- part2 rules pots = (length differentQuads, steadyDiff, sum la, sum lb, sum lc, sum ld)-- (fromIntegral (sum la)) + steadyDiff * remainingGenerations
 part2 rules pots = (fromIntegral (sum lc)) + steadyDiff * remainingGenerations
     where rows = (iterate (\r -> applyRules rules r) pots)
           rowQuads = zip4 rows (drop 1 rows) (drop 2 rows) (drop 3 rows)
