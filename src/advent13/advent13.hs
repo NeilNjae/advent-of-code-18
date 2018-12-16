@@ -1,13 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-
 import Prelude hiding (Left, Right)
 import Data.List
 import Data.Tuple (swap)
 import qualified Data.Map.Strict as M
 import Data.Map.Strict ((!))
 
-import Debug.Trace
+-- import Debug.Trace
 
 type Coord = (Int, Int) -- x, y
 data Cell = Horizontal | Vertical | TopLeft | TopRight | Junction deriving (Show, Eq)
@@ -17,17 +16,12 @@ data Cart = Cart Direction Decision deriving (Eq, Show)
 type Layout = M.Map Coord Cell
 type Carts = M.Map Coord Cart
 
-
 main :: IO ()
 main = do 
     text <- readFile "data/advent13.txt"
     let (layout, carts) = parse text
-    -- print carts
-    -- print layout
-    -- print $ propogateUntilCollision (orderedCarts carts) layout carts
     putStrLn $ showCoord $ part1 carts layout
     putStrLn $ showCoord $ part2 carts layout
-
 
 part1 :: Carts -> Layout -> Coord
 part1 carts layout = collisionSite

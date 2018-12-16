@@ -175,3 +175,10 @@ executable advent13
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , containers
+
+executable advent14
+  hs-source-dirs:      src/advent14
+  main-is:             advent14.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers            
