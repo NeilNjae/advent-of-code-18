@@ -1,6 +1,5 @@
 import qualified Data.Sequence as Q
-import Data.Sequence ((<|), (|>))
-import Data.List
+import Data.Sequence ((|>))
 import Data.Foldable (toList)
 
 type Recipes = Q.Seq Int
