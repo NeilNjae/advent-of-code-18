@@ -26,8 +26,6 @@ part2 :: State -> Int
 part2 state0 = if (takeR (Q.length targetSeq) recipes) == targetSeq
                then (Q.length recipes) - (Q.length targetSeq)
                else (Q.length recipes) - (Q.length targetSeq) - 1
--- recipes -- (Q.length recipes) - (Q.length targetSeq)
-
     where (State _ _ recipes) = head $ dropWhile (unfinished2 targetSeq) $ states state0
 
 unfinished2 :: Recipes -> State -> Bool
