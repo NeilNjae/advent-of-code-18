@@ -51,17 +51,17 @@ main :: IO ()
 main = do 
     text <- readFile "data/advent15.txt"
     let (layout, agents) = parse test3
-    print layout
-    print agents
+ --    print layout
+ --   print agents
     putStrLn $ showWorld layout agents
-    print $ pathsToEnemies (1, 1) layout agents
+--    print $ pathsToEnemies (1, 1) layout agents
     -- let (h, e) = M.findMin $ elfs agents
     -- print (h, e)
     -- forM_ (M.assocs agents) $ \(ah, a) -> do 
     --     print (ah, a)
     --     print $ pathsToEnemies ah layout agents
     --     print $ bestMove ah layout agents     
-    let a1 = doRound layout agents
+    let a1 = doNRounds 22 layout agents
     putStrLn $ showWorld layout a1
     print a1
     let a2 = doRound layout a1
@@ -136,7 +136,7 @@ orderedAdjacentFree here layout agents = Q.sort $ S.foldl' (|>) Q.empty cells
 -- Searching
 
 initAgenda :: Coord -> Coord -> Agenda
-initAgenda start goal = P.singleton ((estimateCost start goal), (fst start * 100 + snd start)) Agendum {_current = start, _trail = Q.empty, _cost = 0}
+initAgenda start goal = P.singleton ((estimateCost start goal), (fst start * 1000 + snd start)) Agendum {_current = start, _trail = Q.empty, _cost = 0}
 
 aStar :: Coord -> Layout -> Agents -> Agenda -> Closed -> Maybe Agendum
 aStar goal layout agents agenda closed 
@@ -151,7 +151,7 @@ aStar goal layout agents agenda closed
             (_, currentAgendum) = P.findMin agenda
             reached = _current currentAgendum
             closed' = S.insert reached closed
-            tieBreakerCost a = foldl' (\t (r, c) -> t + r * 100 + c) 0 ((_current a) <| (_trail a))
+            tieBreakerCost a = foldl' (\t (r, c) -> t + r * 1000 + c) 0 ((_current a) <| (_trail a))
             newAgenda = foldl' (\q a -> P.insert ((estimatedCost a), tieBreakerCost a) a q) (P.deleteMin agenda) $ candidates layout agents currentAgendum closed'
             estimatedCost agendum = estimateCost reached goal + _cost agendum
 
@@ -220,7 +220,9 @@ bestTarget here layout agents = keyOfMinHP $ M.filterWithKey (\c _ -> c `S.membe
     where enemies = touchingEnemies here layout agents
 
 attack :: Coord -> Agents -> Agents
-attack target agents = M.insert target (Agent species (hp - 3)) agents
+attack target agents = if hp > 3 
+                       then M.insert target (Agent species (hp - 3)) agents
+                       else M.delete target agents 
     where Agent species hp = agents!target
 
 keyOfMinHP :: Agents -> Coord -- Ord b => M.Map a b -> a
@@ -234,6 +236,12 @@ makeAttack here layout agents = attack target agents
 
 -- Game loop          
 
+doNRounds :: Int -> Layout -> Agents -> Agents
+doNRounds n layout agents
+    | n == 0 = agents
+    | otherwise = doNRounds (n-1) layout (doRound layout agents)
+
+
 doRound :: Layout -> Agents -> Agents
 doRound layout agents = agents'
     -- where agents' = foldl' (\a h -> makeBestMove h layout a) agents $ M.keys agents
@@ -245,8 +253,9 @@ touchingEnemies here layout agents = S.intersection neighbourhood enemies
           enemies = enemyLocations here agents
 
 agentAction :: Coord -> Layout -> Agents -> Agents
-agentAction here layout agents = 
-    if S.null targets
-    then makeBestMove here layout agents
-    else makeAttack here layout agents
+agentAction here layout agents 
+    | here `M.member` agents = if S.null targets
+                               then makeBestMove here layout agents
+                               else makeAttack here layout agents
+    | otherwise = agents
     where targets = touchingEnemies here layout agents
