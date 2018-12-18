@@ -181,4 +181,14 @@ executable advent14
   main-is:             advent14.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
-                     , containers            
+                     , containers   
+
+executable advent15
+  hs-source-dirs:      src/advent15
+  main-is:             advent15.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers   
+                     , pqueue
+
+                                              
