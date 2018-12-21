@@ -1,9 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-import Debug.Trace
+-- import Debug.Trace
 
 import Data.Text (Text)
-import qualified Data.Text as T
+-- import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 
 import Data.Void (Void)
@@ -29,17 +29,10 @@ main :: IO ()
 main = do 
     text <- TIO.readFile "data/advent17.txt"
     let soilSpec = successfulParse text
-    -- print soilSpec
     let ground = makeGround soilSpec
-    -- print ground
-    -- putStrLn $ showGround ground
-    -- putStrLn $ showGround $ handleSource ground (500, 0)
-    -- print $ handleSource ground (500, 0)
     let ground' = filled ground
     print $ part1 ground'
     print $ part2 ground'
-    -- print $ part1 tests
-    -- print $ part2 tests program
 
 
 part1 ground = M.size $ M.union still flowing
@@ -57,7 +50,7 @@ makeGround :: [SoilSpecLine] -> Ground
 makeGround soilSpec = foldl' addSpecLine M.empty soilSpec
 
 addSpecLine :: Ground -> SoilSpecLine -> Ground
-addSpecLine ground ((fixed, fixedVal), (ranged, from, to)) =
+addSpecLine ground ((fixed, fixedVal), (_ranged, from, to)) =
     foldr (\c -> M.insert c Clay) ground addedCells
     where cells = [(fixedVal, i) | i <- [from..to] ]
           addedCells = if fixed == "x" then cells else map swap cells
@@ -84,11 +77,9 @@ bounds ground = (minX, maxX, minY, maxY)
           minY = minimum $ map snd keys
           maxY = maximum $ map snd keys
 
-up (x, y) = (x, y-1)
 down (x, y) = (x, y+1)
 left (x, y) = (x-1, y)
 right (x, y) = (x+1, y)
-
 
 filled :: Ground -> Ground
 filled ground = handleSource ground (500, 0)
@@ -105,12 +96,6 @@ handleSource ground here
                     then handleSource (M.insert here Flowing ground) (down here)
                     else M.insert here Flowing ground
 
-    -- else if (down here) `M.notMember` ground
-    --      then handleSource ground' (down here)
-    --      else flood ground' here
-    -- where (_minX, _maxX, _minY, maxY) = bounds ground
-    --       ground' = (M.insert here Water ground)
-
 flood :: Ground -> Coord -> Ground
 -- flood ground here | trace ("flood " ++ show here) False = undefined
 flood ground here = foldl' handleSource groundB sources
@@ -120,19 +105,6 @@ flood ground here = foldl' handleSource groundB sources
           groundB = if boundL && boundR 
                     then stillWater groundR here
                     else groundR
-
-
-    -- if null sources
-    -- then flood groundLR (up here)
-    -- else foldl' handleSource groundLR sources
-    -- where (groundL, sourcesL) = floodLeft ground here 
-    --       (groundLR,  sourcesR) = floodRight groundL here 
-    --       sources = sourcesL ++ sourcesR
-
--- if the ground under is sand, create a new source 
--- otherwise, 
--- if the groudnd to the left is clay, stop
--- if the ground to the left isn't clay, flood left 
 
 floodLeft :: Ground -> Coord -> (Ground, [Coord], Bool)
 -- floodLeft ground here | trace ("flood <= " ++ show here) False = undefined
@@ -168,27 +140,6 @@ floodRight ground here =
           under = M.findWithDefault Sand (down here) ground
           rightWards = M.findWithDefault Sand (right here) ground
           underRight =  M.findWithDefault Sand (right (down here)) ground
-    -- if under == Sand
-    -- then (ground', [here])
-    -- else if rightWards == Clay
-    --      then (ground', [])
-    --      else if (under == Water) && (rightWards == Sand) 
-    --           then (ground', [])
-    --           else floodRight ground' (left here)
-    -- where ground' = (M.insert here Water ground)
-    --       under = M.findWithDefault Sand (down here) ground
-    --       rightWards = M.findWithDefault Sand (right here) ground
--- floodRight ground here = 
-    -- case under of
-    --     Sand -> (ground', [here])
-    --     Water -> (ground', [])
-    --     otherwise -> if (right here) `M.notMember` ground
-    --                  then floodRight ground' (right here)
-    --                  else if ground!(right here) == Water
-    --                       then floodRight ground' (right here)
-    --                       else (ground', [])
-    -- where ground' = (M.insert here Water ground)
-    --       under = M.findWithDefault Sand (down here) ground
 
 stillWater :: Ground -> Coord -> Ground
 -- stillWater ground here | trace ("stilling " ++ show here) False = undefined
@@ -210,7 +161,6 @@ stillWaterR ground here =
     then ground'
     else stillWaterR ground' (right here)
     where ground' = (M.insert here Still ground)
-
 
 
 -- Parse the input file
