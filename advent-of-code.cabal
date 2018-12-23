@@ -208,3 +208,22 @@ executable advent17
                      , text
                      , megaparsec
                      , containers
+
+executable advent18
+  hs-source-dirs:      src/advent18
+  main-is:             advent18.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text
+                     , megaparsec
+                     , containers
+
+executable advent19
+  hs-source-dirs:      src/advent19
+  main-is:             advent19.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+                     , mtl
+                     , text
+                     , megaparsec   
