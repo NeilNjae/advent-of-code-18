@@ -1,5 +1,6 @@
 {-# LANGUAGE NegativeLiterals #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE BangPatterns #-}
 
 
 -- import Debug.Trace
@@ -21,42 +22,70 @@ import qualified Data.Set as S
 
 import Linear (V2(..))
 
-import Control.Monad.State.Lazy
+-- import Control.Monad.State.Lazy
+import Control.Monad.State.Strict
+import Control.Monad.Extra (concatMapM)
+-- import Control.Monad.Trans.List
 
 type Coord = V2 Integer -- x, y, with north and east incresing values (origin a bottom left)
 data Door = Door Coord Coord deriving (Show, Eq, Ord)
 type Doors = S.Set Door
 
+data MazeSection = Path [Coord] | Junction [Maze] deriving (Show, Eq)
+type Maze = [MazeSection]
+
+
+type Mapper = State Doors [Coord]
+
+
 makeDoor :: Coord -> Coord -> Door
-makeDoor a b 
+makeDoor !a !b 
     | a < b = Door a b
     | otherwise = Door b a
-
-
-
 
 main :: IO ()
 main = do 
         text <- TIO.readFile "data/advent20.txt"
+        let maze = successfulParse text
         print $ T.length text
-        -- let (ip, instrs) = successfulParse text
-        -- print (ip, instrs)
-        -- -- print $ part1 ip instrs
-        -- print $ sum [i | i <- [1..1032], 1032 `mod` i == 0]
-        -- -- print $ part2 ip instrs
-        -- print $ sum [i | i <- [1..10551432], 10551432 `mod` i == 0]
+        -- print maze
+        part1 maze
 
 
+emptyMap = S.empty
 
--- type Parser = Parsec Void Text
-type Parser = ParsecT Void Text (StateT [Coord] [])
+part1 maze = 
+    do 
+        let start = V2 0 0
+        let doors = execState (mapMaze [start] maze) emptyMap
+        print $ length doors
 
+
+mapMaze :: [Coord] -> Maze -> Mapper
+mapMaze !starts !sections =
+    foldM (\heres section -> mapMazeSection heres section) starts sections
+
+mapMazeSection :: [Coord] -> MazeSection -> Mapper
+mapMazeSection !starts (Junction mazes) = 
+    concatMapM (\maze -> mapMaze starts maze) mazes
+mapMazeSection !starts (Path steps) = 
+    mapM mapPath starts
+    where mapPath start = foldM (\here step -> includeDoor here step) start steps
+
+includeDoor :: Coord -> Coord -> State Doors Coord
+includeDoor !here !step = 
+    do let there = (here + step)
+       let door = there `seq` makeDoor here there
+       modify' (door `seq` S.insert door)
+       return there
+
+
+type Parser = Parsec Void Text
 
 sc :: Parser ()
 sc = L.space (skipSome spaceChar) CA.empty CA.empty
 
-lexeme  = L.lexeme sc
--- integer = lexeme L.decimal
+-- lexeme  = L.lexeme sc
 symb = L.symbol sc
 branchSepP = symb "|"
 openBranchP = symb "("
@@ -71,57 +100,21 @@ sP = (symb "S" *> pure (V2  0 -1))
 eP = (symb "E" *> pure (V2  1  0))
 wP = (symb "W" *> pure (V2 -1  0))
 
--- instructionFileP = (startP `between` endP) branchesP
+pathP = Path <$> some doorP
 
--- branchesP :: MyParser Doors
--- branchesP = fmap S.unions . many $ choiceP <|> pathP
+junctionP = Junction <$> (openBranchP `between` closeBranchP) manyMazesP
 
--- choiceP :: MyParser Doors
--- choiceP = (openBranchP `between` closeBranchP)  $ do
---     here <- get
---     return fmap S.unions (`sepBy` branchSepP) $ do
---         put here
---         return branchesP
+manyMazesP = mazeP `sepBy` branchSepP
 
+mazeSectionP = pathP <|> junctionP
 
+mazeP = many mazeSectionP
 
--- pathP :: MyParser Doors
--- pathP = S.fromList <$> many stepP
-pathP = many stepP
-
--- stepP :: MyParser Door
-stepP = do
-    heres <- get
-    delta <- doorP
-    let theres = map (+delta) heres 
-    put theres
-    return (map (\h -> makeDoor h (h + delta)) heres)
-
--- choiceP :: MyParser [Door]
--- choiceP = (openBranchP `between` closeBranchP) $ do
---     heres <- get
---     do 
---         here <- heres
---         put [here]
---         branch <- (pathP `sepBy` branchSepP)
---         return branch
-
-    -- fmap concat $ (`sepBy` branchSepP) $ do
-    --     here <- heres 
-    --     pathP
+wholeMazeP = (startP `between` endP) mazeP
 
 
-{-    heres <- get
-    choices <- (`sepBy` branchSepP) $ do
-        put heres
-        pathP
-    return $ concat choices -- (S.unions choices)-}
-
--- choiceOrPathP = many (choiceP <|> pathP)
-
-
--- successfulParse :: Text -> (Integer, [Instruction])
--- successfulParse input = 
---         case parse instructionsP "input" input of
---                 Left  _error -> (0, []) -- TIO.putStr $ T.pack $ parseErrorPretty err
---                 Right instructions  -> instructions
+successfulParse :: Text -> Maze
+successfulParse input = 
+        case parse wholeMazeP "input" input of
+                Left  _error -> [] -- TIO.putStr $ T.pack $ parseErrorPretty err
+                Right maze   -> maze

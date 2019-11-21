@@ -235,6 +235,8 @@ executable advent20
   build-depends:       base >= 4.7 && < 5
                      , containers
                      , mtl
+                     , transformers
+                     , extra
                      , text
                      , megaparsec 
                      , linear

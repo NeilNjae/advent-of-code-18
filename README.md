@@ -55,11 +55,15 @@ stack ghci advent-of-code:exe:advent01
 
 To profile, use 
 ```
-stack build --executable-profiling --library-profiling --ghc-options="-fprof-auto -rtsopts" adventofcode1601
+stack build --executable-profiling --library-profiling --ghc-options="-fprof-auto -rtsopts"
 ```
 then run with
 ```
 stack exec -- advent01 +RTS -p -hy
+```
+Generate the profile graph with
+```
+stack exec hp2ps advent01.hp
 ```
 
 # Packages
