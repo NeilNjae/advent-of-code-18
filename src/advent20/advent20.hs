@@ -16,6 +16,8 @@ import Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Control.Applicative as CA
 
+import Data.List (nub)
+
 import qualified Data.Map.Strict as M
 import Data.Map.Strict ((!))
 import qualified Data.Set as S
@@ -34,8 +36,9 @@ type Doors = S.Set Door
 data MazeSection = Path [Coord] | Junction [Maze] deriving (Show, Eq)
 type Maze = [MazeSection]
 
-
 type Mapper = State Doors [Coord]
+
+type Distances = M.Map Coord Integer
 
 
 makeDoor :: Coord -> Coord -> Door
@@ -48,17 +51,19 @@ main = do
         text <- TIO.readFile "data/advent20.txt"
         let maze = successfulParse text
         print $ T.length text
-        -- print maze
-        part1 maze
+        print $ length $ show maze
+        let start = V2 0 0
+        let doors = execState (mapMaze [start] maze) emptyMap
+        print $ length doors
+        let distances = dijkstra (S.singleton start) (M.singleton start 0) doors
+        print $ part1 distances
+        print $ part2 distances
 
 
 emptyMap = S.empty
 
-part1 maze = 
-    do 
-        let start = V2 0 0
-        let doors = execState (mapMaze [start] maze) emptyMap
-        print $ length doors
+part1 distances = maximum $ M.elems distances
+part2 distances = M.size $ M.filter (>= 1000) distances
 
 
 mapMaze :: [Coord] -> Maze -> Mapper
@@ -67,7 +72,8 @@ mapMaze !starts !sections =
 
 mapMazeSection :: [Coord] -> MazeSection -> Mapper
 mapMazeSection !starts (Junction mazes) = 
-    concatMapM (\maze -> mapMaze starts maze) mazes
+    do finishes <- concatMapM (\maze -> mapMaze starts maze) mazes
+       return $! nub finishes
 mapMazeSection !starts (Path steps) = 
     mapM mapPath starts
     where mapPath start = foldM (\here step -> includeDoor here step) start steps
@@ -78,6 +84,32 @@ includeDoor !here !step =
        let door = there `seq` makeDoor here there
        modify' (door `seq` S.insert door)
        return there
+
+dijkstra :: S.Set Coord -> Distances -> Doors -> Distances
+dijkstra boundary distances doors
+    | S.null boundary = distances
+    | otherwise = dijkstra boundary' distances' doors
+    where (hereSet, others) = S.splitAt 1 boundary
+          here = S.findMin hereSet
+          nbrs = neighbours here doors
+          distance = distances!here
+          distance' = distance + 1
+          unseenNbrs = S.filter (\n -> M.notMember n distances) nbrs
+          boundary' = S.union others unseenNbrs
+          distances' = S.foldl (\d n -> M.insert n distance' d) distances unseenNbrs
+
+possibleNeighbours :: Coord -> S.Set Coord
+possibleNeighbours here = S.fromList $ map (+ here) [V2 0 1, V2 0 (-1), V2 1 0, V2 (-1) 0]
+
+neighbours :: Coord -> Doors -> S.Set Coord
+neighbours here doors = S.filter doorExists nbrs
+    where nbrs = possibleNeighbours here
+          doorExists there = S.member (makeDoor here there) doors
+
+
+
+-- S.intersection doors $ possibleDoors
+--    where possibleDoors = S.map (makeDoor here there) $ possibleNeighbours here 
 
 
 type Parser = Parsec Void Text
