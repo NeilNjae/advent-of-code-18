@@ -48,6 +48,11 @@ Run with
 stack exec advent01
 ```
 
+If you want to pass in additional RTS parameters, do it like this:
+```
+stack exec -- advent01 +RTS -K0 -RTS
+```
+
 Run interactively with
 ```
 stack ghci advent-of-code:exe:advent01
