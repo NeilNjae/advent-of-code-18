@@ -250,3 +250,23 @@ executable advent21
                      , mtl
                      , text
                      , megaparsec   
+
+executable advent21fm
+  hs-source-dirs:      src/advent21
+  main-is:             advent21-from-megathread.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+                     , mtl
+                     , text
+                     , megaparsec
+                     , monad-loops
+                     , array
+
+executable advent22
+  hs-source-dirs:      src/advent22
+  main-is:             advent22.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+                     , pqueue
