@@ -270,3 +270,14 @@ executable advent22
   build-depends:       base >= 4.7 && < 5
                      , containers
                      , pqueue
+
+executable advent23
+  hs-source-dirs:      src/advent23
+  main-is:             advent23.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+                     , text
+                     , megaparsec 
+                     , linear
+                     , pqueue
