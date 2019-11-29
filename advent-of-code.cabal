@@ -299,3 +299,14 @@ executable advent24naive
                      , containers
                      , text
                      , megaparsec 
+
+
+executable advent25
+  hs-source-dirs:      src/advent25
+  main-is:             advent25.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , containers
+                     , text
+                     , megaparsec 
+                     , linear
