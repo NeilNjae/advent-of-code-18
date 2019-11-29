@@ -291,9 +291,9 @@ executable advent24
                      , text
                      , megaparsec 
 
-executable advent24iterate
+executable advent24naive
   hs-source-dirs:      src/advent24
-  main-is:             advent24iterate.hs
+  main-is:             advent24naive.hs
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5
                      , containers

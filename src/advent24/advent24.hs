@@ -3,9 +3,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeFamilies #-}
 
--- Box division approach taken from fizbin: 
--- https://www.reddit.com/r/adventofcode/comments/a8s17l/2018_day_23_solutions/ecfmpy0/
-
 import Debug.Trace
 
 -- import Prelude hiding ((++))
@@ -20,7 +17,7 @@ import qualified Text.Megaparsec.Char.Lexer as L
 import qualified Control.Applicative as CA
 
 import Data.List hiding (group)
-import Data.Function (on)
+-- import Data.Function (on)
 import qualified Data.Map.Strict as M
 import Data.Map.Strict ((!))
 
@@ -51,9 +48,47 @@ main = do
         let armies = successfulParse text
         print armies
         print $ part1 (fst armies) (snd armies)
+        print $ part2 (fst armies) (snd armies)
 
+
+part1 :: Army -> Army -> Int
+part1 immuneArmy infectionArmy = uncurry remainingUnitCount endState
+    where endState = battle immuneArmy infectionArmy
+
+
+part2 immuneArmy infectionArmy = (minimalBoost, part1 immuneArmy' infectionArmy)
+    where boostUpper = findSuccessfulBoost 1 immuneArmy infectionArmy
+          minimalBoost = boostSearch 0 boostUpper immuneArmy infectionArmy
+          immuneArmy' = applyBoost minimalBoost immuneArmy
+
+
+findSuccessfulBoost boost immuneArmy infectionArmy = 
+    if success 
+    then boost
+    else findSuccessfulBoost (2 * boost) immuneArmy infectionArmy
+    where success = immuneSuccessWithBoost boost immuneArmy infectionArmy
+
+boostSearch lower upper _ _ | trace ("Searching in " ++ show (lower, upper)) False = undefined
+boostSearch lower upper immuneArmy infectionArmy = 
+    if lower == upper
+    then lower
+    else boostSearch lower' upper' immuneArmy infectionArmy
+    where boost = lower + (upper - lower) `div` 2
+          success = immuneSuccessWithBoost boost immuneArmy infectionArmy
+          lower' = if success then lower else boost + 1
+          upper' = if success then boost else upper
+
+immuneSuccessWithBoost :: Int -> Army -> Army -> Bool
+immuneSuccessWithBoost boost _ _ | trace ("Trial with boost " ++ show boost) False = undefined
+immuneSuccessWithBoost boost immuneArmy infectionArmy = immuneWins $ battle immuneArmy' infectionArmy
+    where immuneArmy' = applyBoost boost immuneArmy
+
+
+
+effectivePower :: Group -> Int
 effectivePower group = (_units group) * (_damage group)
 
+damageCaused :: Group -> Group -> Int
 damageCaused attacker defender = 
     if attackType `elem` immunities then 0
     else if attackType `elem` weaknesses then (2 * effectivePower attacker)
@@ -62,12 +97,15 @@ damageCaused attacker defender =
           weaknesses = foldl' extractWeakness [] (_modifiers defender)
           immunities = foldl' extractImmunity [] (_modifiers defender)
 
+extractWeakness :: [String] -> Modifier -> [String]
 extractWeakness currentWeaknesses (Weakness ws) = currentWeaknesses ++ ws
 extractWeakness currentWeaknesses (Immunity _ws) = currentWeaknesses
 
+extractImmunity :: [String] -> Modifier -> [String]
 extractImmunity currentImmunity (Weakness _ms) = currentImmunity
 extractImmunity currentImmunity (Immunity ms) = currentImmunity ++ ms
 
+applyDamage :: Group -> Int -> Group
 applyDamage group damage = group { _units = unitsRemaining }
     where unitsKilled = damage `div` (_hps group)
           unitsRemaining = maximum [0, (_units group) - unitsKilled]
@@ -102,7 +140,6 @@ allocateAttacker attackers defenders (assignedTargets, availableTargets) attacke
 battleOrder :: Army -> Army -> [BattleOrder]
 battleOrder immuneArmy infectionArmy = mergeOrders immuneIds infectIds
     where armyIds army = reverse $ sort [(_initiative (army!k), k) | k <- M.keys army]
-    -- $ sortOn (\k -> (_initiative (army!k), k)) $ M.keys army
           immuneIds = armyIds immuneArmy
           infectIds = armyIds infectionArmy
 
@@ -113,18 +150,21 @@ mergeOrders ((i1, k1):id1s) ((i2, k2):id2s)
     | i1 >= i2  = (Immune k1):(mergeOrders id1s ((i2, k2):id2s))
     | otherwise = (Infection k2):(mergeOrders ((i1, k1):id1s) id2s)
 
-battleRound :: Army -> Army -> (Army, Army)
-battleRound immuneArmy infectionArmy | trace ("Round\n" ++ show immuneArmy ++ " " ++ show infectionArmy) False = undefined
+battleRound :: (Army, Army) -> (Army, Army)
+-- battleRound (immuneArmy, infectionArmy) | trace ("Round\n" ++ show immuneArmy ++ " " ++ show infectionArmy) False = undefined
 -- battleRound immuneArmy infectionArmy | trace (show (armyCount immuneArmy) ++ " " ++ show (armyCount infectionArmy)) False = undefined
-battleRound immuneArmy infectionArmy = (pruneArmy immuneArmy', pruneArmy infectionArmy')
+battleRound (immuneArmy, infectionArmy) = (pruneArmy immuneArmy'', pruneArmy infectionArmy')
     where immuneAllocations = allocateAttackers immuneArmy infectionArmy
           infectionAllocations = allocateAttackers infectionArmy immuneArmy
           actionOrder = battleOrder immuneArmy infectionArmy
           (immuneArmy', infectionArmy') =     foldl' (\ (a1, a2) order -> handleOrder order immuneAllocations infectionAllocations a1 a2) 
                                                      (immuneArmy, infectionArmy)  actionOrder
+          -- test for stalemate
+          immuneArmy'' = if (immuneArmy' == immuneArmy) && (infectionArmy' == infectionArmy)
+                         then M.empty
+                         else immuneArmy'
 
 
--- armyCount army = sum [_units g | g <- M.elems army ]
 
 handleOrder :: BattleOrder -> [Allocation] -> [Allocation] -> Army -> Army -> (Army, Army)
 handleOrder (Immune k) allocations _ attackArmy defendArmy = (attackArmy, defendArmy')
@@ -143,12 +183,9 @@ handleAttack attacker allocations attackArmy defendArmy =
           damage = damageCaused (attackArmy!attacker) defendGroup
           defendGroup' = applyDamage defendGroup damage
 
-battle :: Army -> Army -> Int
-battle immuneArmy infectionArmy = 
-    if battleOver immuneArmy infectionArmy 
-    then remainingUnitCount immuneArmy infectionArmy
-    else battle immuneArmy' infectionArmy'
-    where (immuneArmy', infectionArmy') = battleRound immuneArmy infectionArmy
+
+battle :: Army -> Army -> (Army, Army)
+battle immuneArmy infectionArmy = head $ dropWhile (not . uncurry battleOver) $ iterate battleRound (immuneArmy, infectionArmy)
 
 
 pruneArmy :: Army -> Army
@@ -161,10 +198,17 @@ battleOver immuneArmy infectionArmy = (M.null immuneArmy) || (M.null infectionAr
 remainingUnitCount :: Army -> Army -> Int
 -- remainingUnitCount immuneArmy infectionArmy | trace ("End with\n" ++ show immuneArmy ++ " " ++ show infectionArmy) False = undefined
 remainingUnitCount immuneArmy infectionArmy = (unitCount immuneArmy) + (unitCount infectionArmy)
-    where unitCount army = sum $ [_units g | g <- M.elems army]
+
+unitCount :: Army -> Int
+unitCount army = sum [_units g | g <- M.elems army]
 
 
-part1 = battle
+immuneWins :: (Army, Army) -> Bool
+immuneWins (immuneArmy, infectionArmy) = (unitCount immuneArmy > 0) && (unitCount infectionArmy == 0)
+
+
+applyBoost :: Int -> Army -> Army
+applyBoost boost = M.map (\g -> g { _damage = (_damage g + boost)})
 
 
 type Parser = Parsec Void Text

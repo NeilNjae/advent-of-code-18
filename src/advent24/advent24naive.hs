@@ -52,13 +52,8 @@ main = do
         print armies
         print $ part1 (fst armies) (snd armies)
 
-
-part1 = battle
-
-effectivePower :: Group -> Int
 effectivePower group = (_units group) * (_damage group)
 
-damageCaused :: Group -> Group -> Int
 damageCaused attacker defender = 
     if attackType `elem` immunities then 0
     else if attackType `elem` weaknesses then (2 * effectivePower attacker)
@@ -67,15 +62,12 @@ damageCaused attacker defender =
           weaknesses = foldl' extractWeakness [] (_modifiers defender)
           immunities = foldl' extractImmunity [] (_modifiers defender)
 
-extractWeakness :: [String] -> Modifier -> [String]
 extractWeakness currentWeaknesses (Weakness ws) = currentWeaknesses ++ ws
 extractWeakness currentWeaknesses (Immunity _ws) = currentWeaknesses
 
-extractImmunity :: [String] -> Modifier -> [String]
 extractImmunity currentImmunity (Weakness _ms) = currentImmunity
 extractImmunity currentImmunity (Immunity ms) = currentImmunity ++ ms
 
-applyDamage :: Group -> Int -> Group
 applyDamage group damage = group { _units = unitsRemaining }
     where unitsKilled = damage `div` (_hps group)
           unitsRemaining = maximum [0, (_units group) - unitsKilled]
@@ -121,10 +113,10 @@ mergeOrders ((i1, k1):id1s) ((i2, k2):id2s)
     | i1 >= i2  = (Immune k1):(mergeOrders id1s ((i2, k2):id2s))
     | otherwise = (Infection k2):(mergeOrders ((i1, k1):id1s) id2s)
 
-battleRound :: (Army, Army) -> (Army, Army)
--- battleRound (immuneArmy, infectionArmy) | trace ("Round\n" ++ show immuneArmy ++ " " ++ show infectionArmy) False = undefined
+battleRound :: Army -> Army -> (Army, Army)
+battleRound immuneArmy infectionArmy | trace ("Round\n" ++ show immuneArmy ++ " " ++ show infectionArmy) False = undefined
 -- battleRound immuneArmy infectionArmy | trace (show (armyCount immuneArmy) ++ " " ++ show (armyCount infectionArmy)) False = undefined
-battleRound (immuneArmy, infectionArmy) = (pruneArmy immuneArmy', pruneArmy infectionArmy')
+battleRound immuneArmy infectionArmy = (pruneArmy immuneArmy', pruneArmy infectionArmy')
     where immuneAllocations = allocateAttackers immuneArmy infectionArmy
           infectionAllocations = allocateAttackers infectionArmy immuneArmy
           actionOrder = battleOrder immuneArmy infectionArmy
@@ -152,8 +144,11 @@ handleAttack attacker allocations attackArmy defendArmy =
           defendGroup' = applyDamage defendGroup damage
 
 battle :: Army -> Army -> Int
-battle immuneArmy infectionArmy = uncurry remainingUnitCount endState
-    where endState = head $ dropWhile (not . uncurry battleOver) $ iterate battleRound (immuneArmy, infectionArmy)
+battle immuneArmy infectionArmy = 
+    if battleOver immuneArmy infectionArmy 
+    then remainingUnitCount immuneArmy infectionArmy
+    else battle immuneArmy' infectionArmy'
+    where (immuneArmy', infectionArmy') = battleRound immuneArmy infectionArmy
 
 
 pruneArmy :: Army -> Army
@@ -168,6 +163,8 @@ remainingUnitCount :: Army -> Army -> Int
 remainingUnitCount immuneArmy infectionArmy = (unitCount immuneArmy) + (unitCount infectionArmy)
     where unitCount army = sum $ [_units g | g <- M.elems army]
 
+
+part1 = battle
 
 
 type Parser = Parsec Void Text
